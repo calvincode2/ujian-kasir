@@ -83,7 +83,7 @@ class ProductController extends Controller
 
             return response()->json([
                 'message' => 'Product updated successfully',
-                'data' => $product
+                'data' => $product->fresh()
             ], 200);
         } catch (\Throwable $th) {
             return response()->json([
@@ -97,7 +97,6 @@ class ProductController extends Controller
      */
     public function destroy(string $id)
     {
-        try {
             $product = Product::findOrFail($id);
 
             $product->delete();
@@ -105,10 +104,5 @@ class ProductController extends Controller
             return response()->json([
                 'message' => 'Product deleted successfully'
             ], 200);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'message' => $th->getMessage()
-            ], 500);
-        }
     }
 }
