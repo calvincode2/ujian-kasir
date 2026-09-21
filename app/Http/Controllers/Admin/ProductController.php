@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Models\Stock;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class ProductController extends Controller
 {
@@ -13,8 +15,7 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::all();
-        return view('admin.products.index', compact('products'));
+        return view('admin.products.index', ['products' => Product::with('stock')->get()]);
     }
 
     /**
@@ -27,19 +28,25 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
+        $validated = $request->validate([
+            'name' => ['required', 'unique:products', 'string', 'max:255'],
+            'price' => ['required', 'integer'],
+            'size' => ['required', 'string', 'max:255'],
+            'description' => ['required', 'string', 'max:255'],
+            'stock' => ['required', 'integer']
+        ]);
         try {
-            $validated = $request->validate([
-                'name' => ['required', 'unique:products', 'string', 'max:255'],
-                'price' => ['required', 'integer'],
-                'size' => ['required', 'string', 'max:255'],
-                'description' => ['required', 'string', 'max:255']
-            ]);
+            $product = Product::create($validated);
 
-            $data = Product::create($validated);
+            // create untuk stock
+            Stock::create([
+                'product_id' => $product->id,
+                'quantity' => $validated['stock']
+            ]);
 
             return response()->json([
                 'message' => 'Product Created Successfully',
-                'data' => $data
+                'data' => $product->load(['stock'])
             ], 201);
         } catch (\Throwable $th) {
             return response()->json([
@@ -69,16 +76,15 @@ class ProductController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $product = Product::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255', Rule::unique('products', 'name')->ignore($product->id)],
+            'price' => ['required', 'integer'],
+            'size' => ['required', 'string', 'max:255'],
+            'description' => ['required', 'string', 'max:255']
+        ]);
         try {
-            $product = Product::findOrFail($id);
-
-            $validated = $request->validate([
-                'name' => ['required', 'string', 'max:255'],
-                'price' => ['required', 'integer'],
-                'size' => ['required', 'string', 'max:255'],
-                'description' => ['required', 'string', 'max:255']
-            ]);
-
             $product->update($validated);
 
             return response()->json([
@@ -97,12 +103,12 @@ class ProductController extends Controller
      */
     public function destroy(string $id)
     {
-            $product = Product::findOrFail($id);
+        $product = Product::findOrFail($id);
 
-            $product->delete();
+        $product->delete();
 
-            return response()->json([
-                'message' => 'Product deleted successfully'
-            ], 200);
+        return response()->json([
+            'message' => 'Product deleted successfully'
+        ], 200);
     }
 }

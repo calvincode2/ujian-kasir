@@ -12,4 +12,9 @@ class Product extends Model
         'size',
         'description'
     ];
-}  
+
+    public function stock()
+    {
+        return $this->hasOne(Stock::class);
+    }
+}

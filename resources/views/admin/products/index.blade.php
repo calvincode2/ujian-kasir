@@ -50,6 +50,10 @@
                                         Description
                                     </th>
 
+                                    <th scope="col" class="py-3 font-medium">
+                                        Stock
+                                    </th>
+
                                     <th scope="col" class="px-5 py-3 font-medium text-center whitespace-nowrap">
                                         Action
                                     </th>
@@ -83,6 +87,19 @@
 
                                         <td class="px-6 py-4">
                                             {{ $product->description }}
+                                        </td>
+
+                                        <td >
+                                            <button type="button" class="btn-stock font-medium hover:underline"
+                                                data-product-id="{{ $product->id }}"
+                                                data-product-name="{{ $product->name }}"
+                                                data-product-size="{{ $product->size }}"
+                                                data-product-price="{{ $product->price }}"
+                                                data-product-description="{{ $product->description }}"
+                                                data-product-stock="{{ $product->stock?->quantity ?? 0 }}"
+                                                data-stock-id="{{ $product->stock?->id }}">
+                                                {{ $product->stock?->quantity ?? 0 }}
+                                            </button>
                                         </td>
 
                                         <td class="px-6 py-4 text-right whitespace-nowrap">
@@ -133,9 +150,11 @@
 
     @include('admin.products.create')
     @include('admin.products.edit')
+    @include('admin.products.restock')
 
     @push('scripts')
         @vite('resources/js/product.js')
+        @vite('resources/js/stock.js')
     @endpush
 
 </x-app-layout>

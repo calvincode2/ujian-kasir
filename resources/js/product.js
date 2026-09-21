@@ -9,6 +9,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const productTableBody = document.getElementById("product-table-body");
     const alertContainer = document.getElementById("alert-container");
 
+    const name = document.getElementById("create-name");
+    const stock = document.getElementById("create-stock");
+    const price = document.getElementById("create-price");
+    const size = document.getElementById("create-size");
+    const description = document.getElementById("create-description");
+
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
     // helper
@@ -49,6 +55,26 @@ document.addEventListener("DOMContentLoaded", () => {
         modal.setAttribute("aria-hidden", "true");
     }
 
+    function handleCloseCreateModal() {
+        if (
+            name.value.trim() !== "" ||
+            stock.value !== "" ||
+            price.value !== "" ||
+            size.value !== "" ||
+            description.value.trim() !== ""
+        ) {
+            const confirmCancel = confirm(
+                "Yakin ingin membatalkan?"
+            );
+
+            if (!confirmCancel) {
+                return;
+            }
+        }
+
+        closeModal(createModal);
+    }
+
     // Create produk
 
     document.getElementById("btn-add-product").addEventListener("click", () => {
@@ -57,23 +83,71 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     document.getElementById("btn-close-modal").addEventListener("click", () => {
-        closeModal(createModal);
+        handleCloseCreateModal();
     });
 
     document
         .getElementById("btn-cancel-modal")
         .addEventListener("click", () => {
-            closeModal(createModal);
+            handleCloseCreateModal();
         });
 
     createForm.addEventListener("submit", async (event) => {
         event.preventDefault();
 
+        const errors = {
+            name: document.getElementById("create-name-error"),
+            stock: document.getElementById("create-stock-error"),
+            price: document.getElementById("create-price-error"),
+            size: document.getElementById("create-size-error"),
+            description: document.getElementById("create-description-error"),
+        };
+
+        let hasError = false;
+
+        // Reset semua error
+        Object.values(errors).forEach((error) => {
+            error.textContent = "";
+            error.classList.add("hidden");
+        });
+
+        // Validasi
+        if (!name.value.trim()) {
+            errors.name.textContent = "nama produk wajib diisi.";
+            errors.name.classList.remove("hidden");
+            hasError = true;
+        }
+
+        if (stock.value === "") {
+            errors.stock.classList.remove("hidden");
+            hasError = true;
+        }
+
+        if (!price.value) {
+            errors.price.classList.remove("hidden");
+            hasError = true;
+        }
+
+        if (!size.value) {
+            errors.size.classList.remove("hidden");
+            hasError = true;
+        }
+
+        if (!description.value.trim()) {
+            errors.description.classList.remove("hidden");
+            hasError = true;
+        }
+
+        if (hasError) {
+            return;
+        }
+
         const data = {
-            name: document.getElementById("create-name").value,
-            price: document.getElementById("create-price").value,
-            size: document.getElementById("create-size").value,
-            description: document.getElementById("create-description").value,
+            name: name.value,
+            price: price.value,
+            size: size.value,
+            description: description.value,
+            stock: stock.value,
         };
 
         try {
@@ -89,28 +163,41 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const result = await response.json();
 
-            if (!response.ok) {
-                throw new Error(result.message || "Failed to create product");
+           if (!response.ok) {
+                if (response.status === 422) {
+                    const message =
+                        result.errors?.name?.[0] ||
+                        result.message ||
+                        "Nama produk sudah digunakan.";
+
+                    errors.name.textContent = message;
+                    errors.name.classList.remove("hidden");
+
+                    return;
+                }
+
+                throw new Error(
+                    result.message || "Failed to create product"
+                );
             }
 
             addProductToTable(result.data);
 
             closeModal(createModal);
-
             createForm.reset();
 
             showAlert(result.message);
+
         } catch (error) {
             console.error(error);
-
             showAlert(error.message, "error");
         }
     });
-
     // Edit produk
 
     const editName = document.getElementById("edit-name");
     const editPrice = document.getElementById("edit-price");
+    const editNameWarning = document.getElementById("edit-name-warning");
     const editSize = document.getElementById("edit-size");
     const editDescription = document.getElementById("edit-description");
 
@@ -118,25 +205,49 @@ document.addEventListener("DOMContentLoaded", () => {
         closeModal(createModal);
 
         editForm.dataset.productId = button.dataset.productId;
+
         editName.value = button.dataset.productName;
         editPrice.value = button.dataset.productPrice;
         editSize.value = button.dataset.productSize;
         editDescription.value = button.dataset.productDescription;
+
+        editNameWarning.textContent = "";
+        editNameWarning.classList.add("hidden");
         openModal(editModal);
     }
 
-    document.getElementById("btn-close-edit").addEventListener("click", () => {
+    function handleCloseEditModal() {
+        if (
+            editName.value.trim() !== "" ||
+            editPrice.value !== "" ||
+            editSize.value !== "" ||
+            editDescription.value.trim() !== ""
+        ) {
+            const confirmCancel = confirm(
+                "Yakin ingin membatalkan?"
+            );
+
+            if (!confirmCancel) {
+                return;
+            }
+        }
+
         closeModal(editModal);
+    }
+
+    document.getElementById("btn-close-edit").addEventListener("click", () => {
+        handleCloseEditModal();
     });
 
     document.getElementById("btn-cancel-edit").addEventListener("click", () => {
-        closeModal(editModal);
+        handleCloseEditModal();
     });
 
     editForm.addEventListener("submit", async (event) => {
         event.preventDefault();
 
         const id = editForm.dataset.productId;
+
         const data = {
             name: editName.value,
             price: editPrice.value,
@@ -158,7 +269,15 @@ document.addEventListener("DOMContentLoaded", () => {
             const result = await response.json();
 
             if (!response.ok) {
-                throw new Error(result.message || "Failed to update product");
+                if (response.status === 422 && result.errors?.name) {
+                    editNameWarning.textContent = result.errors.name[0];
+                    editNameWarning.classList.remove("hidden");
+                    return;
+                }
+
+                throw new Error(
+                    result.message || "Failed to update product"
+                );
             }
 
             updateProductRow(result.data);
@@ -220,13 +339,11 @@ document.addEventListener("DOMContentLoaded", () => {
             "bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium transition";
 
         row.innerHTML = `
-
             <th
                 scope="row"
                 class="row-number px-6 py-4 font-medium text-heading whitespace-nowrap">
 
                 ${rowNumber}
-
             </th>
 
 
@@ -259,6 +376,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
             </td>
 
+            <td class="px-6 py-4">
+                <button
+                    type="button"
+                    class="btn-stock font-medium hover:underline"
+                    data-product-id="${product.id}"
+                    data-product-name="${product.name}"
+                    data-product-size="${product.size}"
+                    data-product-stock="${product.stock?.quantity ?? 0}"
+                    data-product-price="${product.price}"
+                    data-product-description="${product.description ?? ''}"
+                    data-stock-id="${product.stock?.id ?? ''}">
+                    ${product.stock?.quantity ?? 0}
+                </button>
+            </td>
 
             <td class="px-6 py-4 text-right whitespace-nowrap">
 

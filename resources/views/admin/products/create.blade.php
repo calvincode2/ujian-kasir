@@ -34,7 +34,7 @@
 
                 <div class="grid grid-cols-1 gap-5 px-6 py-6 sm:grid-cols-2">
 
-                    <div class="sm:col-span-2">
+                    <div>
 
                         <label for="create-name" class="mb-2 block text-sm font-medium text-white">
                             Product Name
@@ -42,8 +42,24 @@
 
                         <input type="text" name="name" id="create-name"
                             class="block w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2.5 text-sm text-black"
-                            placeholder="Enter product name" required>
+                            placeholder="Enter product name">
 
+                        <p id="create-name-error" class="hidden mt-2 text-sm text-red-500">
+                            nama produk wajib diisi.
+                        </p>
+                    </div>
+
+                    <div>
+                        <label for="create-stock" class="mb-2 block text-sm font-medium text-white">
+                            Stock
+                        </label>
+
+                        <input type="number" name="stock" id="create-stock" min="0"
+                            class="block w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2.5 text-sm text-black"
+                            placeholder="0">
+                        <p id="create-stock-error" class="hidden mt-2 text-sm text-red-500">
+                            stock wajib diisi.
+                        </p>
                     </div>
 
                     <div>
@@ -54,8 +70,10 @@
 
                         <input type="number" name="price" id="create-price"
                             class="block w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2.5 text-sm text-black"
-                            placeholder="500000" required>
-
+                            placeholder="500000">
+                        <p id="create-price-error" class="hidden mt-2 text-sm text-red-500">
+                            harga wajib diisi.
+                        </p>
                     </div>
 
                     <div>
@@ -66,7 +84,7 @@
 
                         <select id="create-size" name="size"
                             class="block w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2.5 text-sm text-black"
-                            required>
+                        >
 
                             <option value="" selected disabled>
                                 Select Size
@@ -89,7 +107,9 @@
                             </option>
 
                         </select>
-
+                        <p id="create-size-error" class="hidden mt-2 text-sm text-red-500">
+                            ukuran wajib dipilih.
+                        </p>
                     </div>
 
                     <div class="sm:col-span-2">
@@ -100,8 +120,10 @@
 
                         <textarea id="create-description" name="description" rows="4"
                             class="block w-full resize-none rounded-lg border border-gray-300 bg-gray-50 p-3 text-sm text-black"
-                            placeholder="Write a short description about this product..." required></textarea>
-
+                            placeholder="Write a short description about this product..."></textarea>
+                        <p id="create-description-error" class="hidden mt-2 text-sm text-red-500">
+                            deskripsi wajib diisi.
+                        </p>
                     </div>
 
                 </div>

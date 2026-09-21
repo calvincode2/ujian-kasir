@@ -10,7 +10,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
-    <script src="{{asset("js/Admin.js")}}"></script>
+    {{-- <script src="{{asset("js/Admin.js")}}"></script> --}}
 
     <!-- Styles / Scripts -->
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
@@ -1527,14 +1527,14 @@
             <nav class="flex items-center justify-end gap-4">
                 @auth
                     @if (auth()->user()->role === 'admin')
-                        <a :href="route('admin.dashboard')"
-                            class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] border-[#19140035] hover:border-[#1915014a] border text-[#1b1b18] dark:border-[#3E3E3A] dark:hover:border-[#62605b] rounded-sm text-sm leading-normal">
+                        <a href="{{ route('admin.dashboard') }}"
+                            class="cursor-pointer inline-block px-5 py-1.5 dark:text-[#EDEDEC] border-[#19140035] hover:border-[#1915014a] border text-[#1b1b18] dark:border-[#3E3E3A] dark:hover:border-[#62605b] rounded-sm text-sm leading-normal">
                             Dashboard
                         </a>
                     @else
-                        <a :href="route('cashier.dashboard')"
+                        <a href="{{ route('cashier.dashboard') }}"
                             class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] border-[#19140035] hover:border-[#1915014a] border text-[#1b1b18] dark:border-[#3E3E3A] dark:hover:border-[#62605b] rounded-sm text-sm leading-normal">
-                            Dashboard
+                            Dashboardcss
                         </a>
                     @endif
                 @else
